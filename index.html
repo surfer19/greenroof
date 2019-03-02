@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+crossorigin=""/>
+<!-- <link href='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' /> -->
+
+</head>
+<body>
+        <div id="mapid"></div>
+<style>
+#mapid { height: 700px; width: 100%; }
+#map { height: 100% }
+</style>
+
+
+
+<!-- <script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"></script> -->
+
+  <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+  integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+  crossorigin=""></script>
+  <!-- <script src='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script> -->
+  <!-- <script type="application/javascript" src="./zelenestrechy.js" id="myJSON"></script> -->
+  <!-- <script type="application/javascript" src="./category_one_zelenestrechy.js" id="myJSON"></script> -->
+  <!-- <script type="application/javascript" src="./bb_zelenestrechy.js" id="myJSON"></script> -->
+  <script type="application/javascript" src="./bb1_zelenestrechy.js" id="myJSON"></script>
+  <script type="application/javascript" src="./bb2_zelenestrechy.js" id="myJSON"></script>
+  <script>
+        var geo = geo_bb1
+        var geo2 = geo_bb2
+        console.log('geo',geo);
+        var mymap = L.map('mapid').setView([50.086385, 14.423693], 15)
+        
+        // // heat map
+        var imageUrl = new Image();
+        imageUrl.src = 'color_img_2.jpg';
+        var imageBounds = [[49.91156 ,13.90904], [50.2512, 14.89781]];        
+        L.imageOverlay(imageUrl, imageBounds, {opacity: 0.85}).addTo(mymap);
+
+        console.log('L', L);
+        var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+        osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        osm = L.tileLayer(osmUrl, {
+            maxZoom: 18,
+            attribution: osmAttrib,
+        });
+        
+        mymap.addLayer(osm);
+    
+        // buildings 1
+        L.geoJSON(geo, {
+            style: function (feature) {
+                // console.log('feature', feature)
+                return {
+                    "color": "rgba(255, 255, 255, 0.5)",
+                    "fill":"red",
+                    "stroke-width": "1",                    
+                    "fill-opacity": 0
+                };//feature.properties.color
+            }
+        }).bindPopup(function (layer) {
+            return layer.feature.properties.description;
+        }).addTo(mymap);
+
+        // buildings
+        L.geoJSON(geo2, {
+            style: function (feature) {
+                // console.log('feature', feature)
+                return {
+                    "color": "rgba(0, 0, 0, 0.5)",
+                    "fill":"red",
+                    "stroke-width": "1",                    
+                    "fill-opacity": 0
+                };//feature.properties.color
+            }
+        }).bindPopup(function (layer) {
+            return layer.feature.properties.description;
+        }).addTo(mymap);        
+
+        osm.bringToFront()
+
+
+    </script>
+    </body>
+</html>
