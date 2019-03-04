@@ -1,90 +1,122 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Page Title</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
-integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
-crossorigin=""/>
-<!-- <link href='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' /> -->
+    <head>
+        <title>Zelene strechy</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin=""/>
 
-</head>
-<body>
+        <style>
+            #mapid { height: 700px; width: 100%; }
+            #map { height: 100% }
+            /* .load { display: none} */
+        </style>
+    </head>
+    <body>
         <div id="mapid"></div>
-<style>
-#mapid { height: 700px; width: 100%; }
-#map { height: 100% }
-</style>
+        <p class="load">Loading...</p>
+        <input id="clickMe" type="button" value="Show heatmaps with all building" onclick="manageLayers('SHOW_HEAT_MAP_WITH_ALL_BUILDINGS', 'any');" />
+        <input id="clickMe" type="button" value="Show non-categorized bad areas" onclick="manageLayers('SHOW_NON_CATEGORIZED_BB', 'any');" />
 
+    <script
+    src="https://code.jquery.com/jquery-3.3.1.js"
+    integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+    crossorigin="anonymous"></script>
 
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+    integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+    crossorigin=""></script>    
+    <!-- <script type="application/javascript" src="./bb_zelenestrechy.js"></script> -->
+    <!-- <script type="application/javascript" src="./bb1_zelenestrechy.js"></script>
+    <script type="application/javascript" src="./bb2_zelenestrechy.js"></script>  -->
+    <!-- <script type="application/javascript" src="./bb1_cat_zelenestrechy.js"></script>
+    <script type="application/javascript" src="./bb2_cat_zelenestrechy.js"></script> -->
 
-<!-- <script
-  src="https://code.jquery.com/jquery-3.3.1.js"
-  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
-  crossorigin="anonymous"></script> -->
+    <script>
+        $( ".load" ).hide();
+        
 
-  <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
-  integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
-  crossorigin=""></script>
-  <!-- <script src='https://api.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script> -->
-  <!-- <script type="application/javascript" src="./zelenestrechy.js" id="myJSON"></script> -->
-  <!-- <script type="application/javascript" src="./category_one_zelenestrechy.js" id="myJSON"></script> -->
-  <!-- <script type="application/javascript" src="./bb_zelenestrechy.js" id="myJSON"></script> -->
-  <script type="application/javascript" src="./bb1_zelenestrechy.js" id="myJSON"></script>
-  <script type="application/javascript" src="./bb2_zelenestrechy.js" id="myJSON"></script>
-  <script>
-        var geo = geo_bb1
-        var geo2 = geo_bb2
-        console.log('geo',geo);
+        // function showOpenStreetMaps(){
+        $.showOpenStreetMaps = function() {
+            var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+                osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                osm = L.tileLayer(osmUrl, {
+                    maxZoom: 18,
+                    attribution: osmAttrib,
+                });
+                mymap.addLayer(osm);
+        }
+
+        $.addBuildingLayer = function(buildingLayer, color) {
+            var dfd = $.Deferred()
+            // buildings layer
+            L.geoJSON(buildingLayer, {
+                style: function (feature) {                    
+                    return {
+                        "color": color == "purple" ? 'rgb(204, 0, 255)' : "rgba(255,255,255)",
+                        "stroke-width": "1",
+                        "fill-opacity": '0'                      
+                    };
+                }
+            }).bindPopup(function (layer) {
+                return layer.feature.properties.description;
+            }).addTo(mymap);
+
+            dfd.resolve();
+            return dfd
+        }
+
+        function manageLayers(layerName) {
+            switch(layerName) {
+                case 'SHOW_ONLY_HEATMAP_PRAGUE':
+                    $.showOpenStreetMaps();
+                    showHeatMap = true;
+                    console.log('console.log')
+                    
+                    break;
+                case 'SHOW_HEAT_MAP_WITH_ALL_BUILDINGS':
+                    $( ".load" ).show();
+                    $.getScript('./zelenestrechy.js', function(){
+                        $.showOpenStreetMaps()
+                        $.addBuildingLayer(geo).done(function(){ // geo var from script contains all building objects
+                            $('.load').hide()
+                        });                        
+                    });
+                    break;
+
+                case 'SHOW_NON_CATEGORIZED_BB':
+                    $( ".load" ).show();
+                    $.getScript('./bb1_zelenestrechy.js', function(){                         
+                        $.showOpenStreetMaps()
+                        $.addBuildingLayer(geo_bb1, 'purple').done(function(){
+                            $('.load').hide()
+                        });                    
+                    });                                     
+                    $.getScript('./bb2_zelenestrechy.js', function(){                                                                         
+                        $.addBuildingLayer(geo_bb2, 'any')
+                    });                                     
+                    break;
+                default:
+            }
+        }        
+        var showOpenStreetMaps = false;
+        var showHeatMap = true;        
         var mymap = L.map('mapid').setView([50.086385, 14.423693], 15)
         
-        // // heat map
-        var imageUrl = new Image();
-        imageUrl.src = 'color_img_2.jpg';
-        var imageBounds = [[49.91156 ,13.90904], [50.2512, 14.89781]];        
-        L.imageOverlay(imageUrl, imageBounds, {opacity: 0.85}).addTo(mymap);
+        manageLayers('SHOW_ONLY_HEATMAP_PRAGUE')
 
-        console.log('L', L);
-        var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-        osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        osm = L.tileLayer(osmUrl, {
-            maxZoom: 18,
-            attribution: osmAttrib,
-        });
         
-        mymap.addLayer(osm);
-    
-        // buildings 1
-        L.geoJSON(geo, {
-            style: function (feature) {
-                // console.log('feature', feature)
-                return {
-                    "color": "rgba(255, 255, 255, 0.5)",
-                    "fill":"red",
-                    "stroke-width": "1",                    
-                    "fill-opacity": 0
-                };//feature.properties.color
-            }
-        }).bindPopup(function (layer) {
-            return layer.feature.properties.description;
-        }).addTo(mymap);
+        if (showHeatMap) {
+            // // heat map
+            var imageUrl = new Image();
+            imageUrl.src = 'color_img_2.jpg';
+            var imageBounds = [[49.91156 ,13.90904], [50.2512, 14.89781]];        
+            L.imageOverlay(imageUrl, imageBounds, {opacity: 0.85}).addTo(mymap);
+        }
 
-        // buildings
-        L.geoJSON(geo2, {
-            style: function (feature) {
-                // console.log('feature', feature)
-                return {
-                    "color": "rgba(0, 0, 0, 0.5)",
-                    "fill":"red",
-                    "stroke-width": "1",                    
-                    "fill-opacity": 0
-                };//feature.properties.color
-            }
-        }).bindPopup(function (layer) {
-            return layer.feature.properties.description;
-        }).addTo(mymap);        
-
-        osm.bringToFront()
-
+        // var base_2 = L.tileLayer('http://geoportal.cuzk.cz/WMTS_ORTOFOTO_900913/WMTService.aspx?service=WMTS&request=GetTile&version=1.0.0&layer=orto&style=default&format=image/png&TileMatrixSet=googlemapscompatibleext2:epsg:3857&TileMatrix={z}&TileRow={y}&TileCol={x}',
+        // {maxZoom: 22,  maxNativeZoom: 18, attribution: 'WMTS - Ortofoto ČR | &copy ČÚZK <a href="http://www.cuzk.cz">www.cuzk.cz</a>' });
+        // mymap.addLayer(base_2);
 
     </script>
     </body>

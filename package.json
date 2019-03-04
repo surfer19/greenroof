@@ -17,5 +17,6 @@
   },
   "homepage": "https://github.com/surfer19/greenroof#readme",
   "dependencies": {
+    "http-server": "^0.11.1"
   }
 }
